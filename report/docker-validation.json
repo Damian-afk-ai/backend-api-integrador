@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-07",
+  "image": "backend-api-integrador:local",
+  "endpoints": 6,
+  "build": true,
+  "health": true,
+  "usersCrud": true,
+  "restartPersistence": true,
+  "extraRouteAbsent": true,
+  "commit": "local"
+}

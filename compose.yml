@@ -1,0 +1,12 @@
+services:
+  api:
+    build: .
+    ports:
+      - "80:3000"
+    volumes:
+      - api-data:/app/storage
+      - api-backups:/app/backups
+    restart: unless-stopped
+volumes:
+  api-data:
+  api-backups:
