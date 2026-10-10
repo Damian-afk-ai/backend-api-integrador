@@ -34,7 +34,7 @@ app.delete('/api/users/:id', wrap(async (req, res) => {
 }));
 app.get('/api/health', (req, res) => db.get('SELECT 1 AS ok', (err) => respond(res, err ? 503 : 200, {
     service: 'backend-api-integrador', healthy: !err,
-    commit: process.env.COMMIT_SHA || 'local', message: 'Proyecto integrador CI/CD'
+    commit: process.env.COMMIT_SHA || 'local', message: 'Actualización automática demostrada con git push'
 })));
 app.use((req, res) => respond(res, 404, 'Ruta no encontrada'));
 app.use((err, req, res, next) => {
