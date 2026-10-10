@@ -14,6 +14,12 @@ docker volume inspect integrador-backups >/dev/null 2>&1 || docker volume create
 old=$(cat "$state/active" 2>/dev/null || true)
 if [[ "$old" == api-blue ]]; then candidate=api-green; else candidate=api-blue; fi
 docker pull "$image"
+
+# No committed active service means a prior bootstrap may have left a
+# restarting proxy. Remove it before replacing its unresolved upstream.
+if [[ -z "$old" ]]; then
+  docker rm -f api-proxy >/dev/null 2>&1 || true
+fi
 docker rm -f "$candidate" >/dev/null 2>&1 || true
 docker run -d --name "$candidate" --network integrador --restart unless-stopped \
   -e COMMIT_SHA="$commit" -v integrador-data:/app/storage -v integrador-backups:/app/backups "$image"
@@ -31,7 +37,7 @@ fi
 mkdir -p "$state/nginx"
 config="$state/nginx/default.conf"
 rm -f "$state/previous.conf"
-[[ ! -f "$config" ]] || cp "$config" "$state/previous.conf"
+[[ -z "$old" || ! -f "$config" ]] || cp "$config" "$state/previous.conf"
 cat > "$config" <<EOF
 upstream backend { server $candidate:3000; }
 server {
