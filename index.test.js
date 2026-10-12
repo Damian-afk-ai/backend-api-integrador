@@ -69,7 +69,7 @@ test('error de consulta devuelve 500 sin detalles internos', async () => {
 });
 test('health devuelve 503 cuando falla SQLite', async () => {
     jest.spyOn(db, 'get').mockImplementationOnce((sql, callback) => { callback(new Error('unavailable')); });
-    const res = await request(app).get('/api/health'); expect(res.status).toBe(503); expect(res.body.data.healthy).toBe(true);
+    const res = await request(app).get('/api/health'); expect(res.status).toBe(503); expect(res.body.data.healthy).toBe(false);
 });
 test('inicio y cierre HTTP', async () => {
     const { httpServer } = startServers();
