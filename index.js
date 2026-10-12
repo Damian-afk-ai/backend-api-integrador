@@ -32,7 +32,7 @@ app.delete('/api/users/:id', wrap(async (req, res) => {
     const result = await query('run', 'DELETE FROM users WHERE id = ?', [req.params.id]);
     respond(res, result.changes ? 200 : 404, result.changes ? 'Usuario eliminado correctamente' : 'Usuario no encontrado');
 }));
-app.get('/api/health', (req, res) => db.get('SELECT 1 AS ok', (err) => respond(res, err ? 503 : 200, {
+app.get('/api/health', (req, res) => db.get('SELECT 1 AS ok 2', (err) => respond(res, err ? 503 : 200, {
     service: 'backend-api-integrador', healthy: !err,
     commit: process.env.COMMIT_SHA || 'local', message: 'Actualización automática demostrada con git push'
 })));
