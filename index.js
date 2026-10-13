@@ -33,7 +33,7 @@ app.delete('/api/users/:id', wrap(async (req, res) => {
     respond(res, result.changes ? 200 : 404, result.changes ? 'Usuario eliminado correctamente' : 'Usuario no encontrado');
 }));
 app.get('/api/health', (req, res) => db.get('SELECT 1 AS ok', (err) => respond(res, err ? 503 : 200, {
-    service: 'backend-api-integrador', healthy: !err,
+    service: 'backend-api-integrador 2', healthy: !err,
     commit: process.env.COMMIT_SHA || 'local', message: 'Prueba 4 realizada por Damian'
 })));
 app.use((req, res) => respond(res, 404, 'Ruta no encontrada'));
