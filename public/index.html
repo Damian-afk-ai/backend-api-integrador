@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gestión de inventario</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+</head>
+<body>
+    <main id="access" class="access" hidden>
+        <section class="login-card" aria-labelledby="login-title">
+            <div class="brand"><span>GI</span> Gestión de inventario</div>
+            <h1 id="login-title">Iniciar sesión</h1>
+            <p>Accede al panel de administración.</p>
+            <form id="login">
+                <label>Usuario <input name="username" required autocomplete="username" autofocus></label>
+                <label>Contraseña <input name="password" type="password" required autocomplete="current-password"></label>
+                <p id="login-error" class="error" role="alert" hidden></p>
+                <button class="primary" type="submit">Entrar</button>
+            </form>
+        </section>
+    </main>
+    <div id="panel" class="panel" hidden>
+        <aside class="sidebar">
+            <div class="brand"><span>GI</span> Gestión de inventario</div>
+            <nav aria-label="Administración">
+                <button type="button" data-view="users">Usuarios</button>
+                <button type="button" data-view="products">Productos</button>
+            </nav>
+            <div class="account">
+                <span id="account-name"></span>
+                <button id="logout" type="button">Cerrar sesión</button>
+            </div>
+        </aside>
+        <main class="workspace">
+            <header class="section-header">
+                <div><h1 id="section-title"></h1><p id="section-description"></p></div>
+                <button id="add" class="primary" type="button"></button>
+            </header>
+            <p id="status" class="status" role="status" hidden></p>
+            <section class="records" aria-labelledby="section-title">
+                <div class="toolbar"><label for="search">Buscar</label><input id="search" type="search"></div>
+                <div class="table-wrap">
+                    <table><thead><tr id="columns"></tr></thead><tbody id="rows"></tbody></table>
+                </div>
+                <p id="empty" class="empty" hidden></p>
+                <footer id="count" class="count"></footer>
+            </section>
+        </main>
+    </div>
+    <dialog id="editor" aria-labelledby="editor-title">
+        <form id="record-form">
+            <h2 id="editor-title"></h2>
+            <div id="fields"></div>
+            <p id="editor-error" class="error" role="alert" hidden></p>
+            <div class="dialog-actions">
+                <button type="button" data-close>Cancelar</button>
+                <button id="save" type="submit" class="primary">Guardar</button>
+            </div>
+        </form>
+    </dialog>
+    <dialog id="confirmation" aria-labelledby="confirmation-title" aria-describedby="confirmation-text">
+        <form id="delete-form">
+            <h2 id="confirmation-title"></h2>
+            <p id="confirmation-text"></p>
+            <p id="delete-error" class="error" role="alert" hidden></p>
+            <div class="dialog-actions">
+                <button type="button" data-close autofocus>Cancelar</button>
+                <button type="submit" class="danger">Eliminar</button>
+            </div>
+        </form>
+    </dialog>
+</body>
+</html>

@@ -1,5 +1,7 @@
 node_modules/
 coverage/
+playwright-report/
+test-results/
 .env
 .env.*
 !.env.example
@@ -9,6 +11,7 @@ coverage/
 *.db-*
 backups/
 *.log
+application.env
 *.tar.gz
 
 report/test-results.json

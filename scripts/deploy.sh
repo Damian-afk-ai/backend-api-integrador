@@ -6,6 +6,8 @@ image=${1:?image required}; commit=${2:?commit required}
 [[ "$commit" =~ ^[a-f0-9]{40}$ ]] || exit 1
 state=${DEPLOY_STATE_DIR:-"$HOME/backend-api-deploy"}
 mkdir -p "$state"
+env_file="$state/application.env"
+[[ -r "$env_file" ]] || { echo "Missing application.env in $state" >&2; exit 1; }
 exec 9>"$state/deploy.lock"
 flock -x 9
 docker network inspect integrador >/dev/null 2>&1 || docker network create integrador
@@ -22,7 +24,7 @@ if [[ -z "$old" ]]; then
 fi
 docker rm -f "$candidate" >/dev/null 2>&1 || true
 docker run -d --name "$candidate" --network integrador --restart unless-stopped \
-  -e COMMIT_SHA="$commit" -v integrador-data:/app/storage -v integrador-backups:/app/backups "$image"
+  --env-file "$env_file" -e COMMIT_SHA="$commit" -v integrador-data:/app/storage -v integrador-backups:/app/backups "$image"
 healthy=false
 for attempt in $(seq 1 30); do
   if [[ $(docker inspect -f '{{.State.Health.Status}}' "$candidate") == healthy ]]; then healthy=true; break; fi

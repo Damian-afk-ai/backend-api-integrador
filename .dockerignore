@@ -1,5 +1,9 @@
 node_modules
 coverage
+playwright-report
+test-results
+tests
+application.env
 .git
 .github
 .env*

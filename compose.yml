@@ -1,8 +1,12 @@
 services:
   api:
     build: .
+    environment:
+      NODE_ENV: development
+      ADMIN_USER: ${ADMIN_USER:?Configura ADMIN_USER}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Configura ADMIN_PASSWORD}
     ports:
-      - "80:3000"
+      - "127.0.0.1:3000:3000"
     volumes:
       - api-data:/app/storage
       - api-backups:/app/backups

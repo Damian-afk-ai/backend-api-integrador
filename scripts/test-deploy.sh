@@ -34,6 +34,7 @@ for scenario in success unhealthy invalid-config wrong-commit bootstrap-recovery
   export MOCK_SCENARIO=$scenario MOCK_STATE="$workspace/$scenario" DEPLOY_STATE_DIR="$workspace/$scenario"
   export MOCK_LOG="$workspace/$scenario/commands.log"
   mkdir -p "$MOCK_STATE/nginx"
+  touch "$MOCK_STATE/application.env"
   rm -f "$MOCK_STATE/rejected" "$MOCK_STATE/proxy-removed"
     if [[ "$scenario" == bootstrap-recovery ]]; then
     rm -f "$MOCK_STATE/active"
