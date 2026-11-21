@@ -82,5 +82,5 @@ docker run --rm -v "$state/nginx/acme:/acme" -v "$state/letsencrypt:/etc/letsenc
 docker exec parcial2-https nginx -s reload
 EOF
 chmod 700 "$state/renew-https.sh"
-( crontab -l 2>/dev/null | awk '!/renew-https\.sh/'; printf '19 2,14 * * * /bin/bash "%s/renew-https.sh"\n' "$state" ) | crontab -
+( { crontab -l 2>/dev/null || true; } | awk '!/renew-https\.sh/'; printf '19 2,14 * * * /bin/bash "%s/renew-https.sh"\n' "$state" ) | crontab -
 printf 'HTTPS listo en https://%s\n' "$ip"
