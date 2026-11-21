@@ -1,7 +1,7 @@
 name: API CI/CD
 on:
   push:
-    branches: [main]
+    branches: [main, parcial2-inventario]
   pull_request:
     branches: [main]
 permissions:
@@ -42,9 +42,25 @@ jobs:
             coverage/
             report/test-results.json
             report/validation.md
+  log-tests:
+    if: always() && !cancelled()
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/report-pipeline.js
+        env:
+          OPENOBSERVE_ENDPOINT: ${{ secrets.OPENOBSERVE_ENDPOINT }}
+          OPENOBSERVE_AUTH: ${{ secrets.OPENOBSERVE_AUTH }}
+          EVENT_NAME: pruebas
+          EVENT_RESULT: ${{ needs.test.result }}
   build-and-push:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: test
+    needs: [test, log-tests]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -105,3 +121,11 @@ jobs:
       - name: Remove SSH key
         if: always()
         run: rm -f ~/.ssh/id_ec2
+      - name: Record deployment in OpenObserve
+        if: success()
+        env:
+          OPENOBSERVE_ENDPOINT: ${{ secrets.OPENOBSERVE_ENDPOINT }}
+          OPENOBSERVE_AUTH: ${{ secrets.OPENOBSERVE_AUTH }}
+          EVENT_NAME: despliegue
+          EVENT_RESULT: success
+        run: node scripts/report-pipeline.js

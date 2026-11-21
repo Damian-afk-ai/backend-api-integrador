@@ -3,13 +3,19 @@ const path = require('node:path');
 const { createHash, randomBytes, timingSafeEqual } = require('node:crypto');
 const db = require('./database');
 const { validateUser, validateProduct } = require('./schemas');
+const telemetry = require('./telemetry');
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const respond = (res, statusCode, data) => res.status(statusCode).json({ statusCode, data });
 const query = (method, sql, args = []) => new Promise((resolve, reject) => {
-    db[method](sql, args, function (err, rows) { err ? reject(err) : resolve(method === 'run' ? this : rows); });
+    const finish = telemetry.databaseSpan(sql.split(' ', 1)[0]);
+    db[method](sql, args, function (err, rows) {
+        finish(err);
+        err ? reject(err) : resolve(method === 'run' ? this : rows);
+    });
 });
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+app.use((req, res, next) => req.path.startsWith('/api/') ? telemetry.middleware(req, res, next) : next());
 app.use(express.json({ limit: '100kb' }));
 app.use((req, res, next) => db.ready.then(() => next(), next));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -107,6 +113,7 @@ app.use((err, req, res, next) => {
     if (String(err.message).includes('UNIQUE constraint failed')) return respond(res, 400, 'El email ya esta registrado');
     if (err.status === 400) return respond(res, 400, 'JSON invalido');
     if (err.status === 413) return respond(res, 413, 'Cuerpo demasiado grande');
+    res.locals.exceptionType = err.name;
     return respond(res, 500, 'Error interno');
 });
 function startServers() {

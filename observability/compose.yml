@@ -1,0 +1,15 @@
+services:
+  hostmetrics:
+    image: otel/opentelemetry-collector-contrib:0.153.0
+    command: ["--config=/etc/otelcol/config.yaml"]
+    environment:
+      OTLP_ENDPOINT: ${OTLP_ENDPOINT:?Configura el endpoint OTLP}
+      OTLP_AUTH: ${OTLP_AUTH:?Configura el token OTLP}
+      EC2_HOST_LABEL: ${EC2_HOST_LABEL:-parcial2-ec2}
+    volumes:
+      - ./collector.yaml:/etc/otelcol/config.yaml:ro
+      - /proc:/hostfs/proc:ro
+      - /sys:/hostfs/sys:ro
+    network_mode: host
+    mem_limit: 128m
+    restart: unless-stopped

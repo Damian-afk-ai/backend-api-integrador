@@ -1,0 +1,42 @@
+receivers:
+  hostmetrics:
+    root_path: /hostfs
+    collection_interval: 30s
+    scrapers:
+      cpu:
+        metrics:
+          system.cpu.utilization:
+            enabled: true
+      memory:
+        metrics:
+          system.memory.utilization:
+            enabled: true
+      network: {}
+
+processors:
+  memory_limiter:
+    check_interval: 5s
+    limit_mib: 75
+    spike_limit_mib: 20
+  resource:
+    attributes:
+      - key: host.name
+        value: ${env:EC2_HOST_LABEL}
+        action: upsert
+  batch: {}
+
+exporters:
+  otlp_http:
+    endpoint: ${env:OTLP_ENDPOINT}
+    headers:
+      Authorization: ${env:OTLP_AUTH}
+
+service:
+  telemetry:
+    metrics:
+      level: none
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+      processors: [memory_limiter, resource, batch]
+      exporters: [otlp_http]

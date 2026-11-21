@@ -10,7 +10,7 @@ ENV COMMIT_SHA=$COMMIT_SHA
 ENV NODE_ENV=production PORT=3000 DB_PATH=/app/storage/data.db
 WORKDIR /app
 COPY --from=dependencies /app/node_modules ./node_modules
-COPY package*.json index.js database.js schemas.js ./
+COPY package*.json index.js database.js schemas.js telemetry.js ./
 COPY public ./public
 RUN mkdir -p storage backups && chown -R node:node storage backups
 USER node
