@@ -40,10 +40,23 @@ mkdir -p "$state/nginx"
 config="$state/nginx/default.conf"
 rm -f "$state/previous.conf"
 [[ -z "$old" || ! -f "$config" ]] || cp "$config" "$state/previous.conf"
+if [[ -f "$state/https-ip" ]]; then
+  read -r public_ip < "$state/https-ip"
+  [[ "$public_ip" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || exit 1
+  http_behavior="return 308 https://$public_ip\$request_uri;"
+else
+  http_behavior="proxy_pass http://backend;"
+fi
 cat > "$config" <<EOF
 upstream backend { server $candidate:3000; }
 server {
   listen 80;
+  location ^~ /.well-known/acme-challenge/ { root /etc/nginx/conf.d/acme; }
+  location = /api/health { proxy_pass http://backend; }
+  location / { $http_behavior }
+}
+server {
+  listen 8080;
   location / {
     proxy_pass http://backend;
     proxy_connect_timeout 3s;
@@ -51,7 +64,7 @@ server {
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header X-Forwarded-Proto https;
   }
 }
 EOF
