@@ -8,6 +8,10 @@ state=${DEPLOY_STATE_DIR:-"$HOME/backend-api-deploy"}
 mkdir -p "$state"
 env_file="$state/application.env"
 [[ -r "$env_file" ]] || { echo "Missing application.env in $state" >&2; exit 1; }
+if ! grep -q '^ADMIN_USER=.' "$env_file" || ! grep -q '^ADMIN_PASSWORD=.' "$env_file"; then
+  echo 'Configure the panel administrator before deploying.' >&2
+  exit 1
+fi
 exec 9>"$state/deploy.lock"
 flock -x 9
 docker network inspect integrador >/dev/null 2>&1 || docker network create integrador
