@@ -10,7 +10,10 @@ const { app } = require('./index');
 
 afterAll(done => { db.close(done); });
 
-test('envía registros, trazas correlacionadas con SQLite y métricas OTLP', async () => {
+test.each([
+    ['POST /api/login', ['SQLite DELETE', 'SQLite INSERT']],
+    ['GET /api/health', []]
+])('envía las tres señales OTLP para %s', async (operation, spans) => {
     const received = new Map();
     let delivered;
     const delivery = new Promise(resolve => { delivered = resolve; });
@@ -27,7 +30,11 @@ test('envía registros, trazas correlacionadas con SQLite y métricas OTLP', asy
     process.env.OTLP_AUTH = 'Basic test';
     let timeout;
     try {
-        await request(app).post('/api/login').send({
+        await request(app).get('/internal/health').expect(200);
+        expect(received.size).toBe(0);
+        if (operation === 'GET /api/health') {
+            await request(app).get('/api/health').expect('Cache-Control', 'no-store').expect(200);
+        } else await request(app).post('/api/login').send({
             username: process.env.ADMIN_USER,
             password: process.env.ADMIN_PASSWORD
         }).expect(200);
@@ -41,8 +48,8 @@ test('envía registros, trazas correlacionadas con SQLite y métricas OTLP', asy
         const [root, ...children] = traces.resourceSpans[0].scopeSpans[0].spans;
         expect(logs.auth).toBe('Basic test');
         expect(log.traceId).toBe(root.traceId);
-        expect(root.name).toBe('POST /api/login');
-        expect(children.map(span => span.name)).toEqual(['SQLite DELETE', 'SQLite INSERT']);
+        expect(root.name).toBe(operation);
+        expect(children.map(span => span.name)).toEqual(spans);
         expect(children.every(span => span.parentSpanId === root.spanId)).toBe(true);
         expect(metrics.resourceMetrics[0].scopeMetrics[0].metrics.map(metric => metric.name))
             .toEqual(['http.server.requests', 'http.server.request.duration']);

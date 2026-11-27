@@ -104,10 +104,12 @@ app.delete('/api/products/:id', wrap(async (req, res) => {
     const result = await query('run', 'DELETE FROM products WHERE id = ?', [req.params.id]);
     respond(res, result.changes ? 200 : 404, result.changes ? 'Producto eliminado correctamente' : 'Producto no encontrado');
 }));
-app.get('/api/health', (req, res) => db.get('SELECT 1 AS ok', (err) => respond(res, err ? 503 : 200, {
+const health = (req, res) => db.get('SELECT 1 AS ok', (err) => respond(res, err ? 503 : 200, {
     service: 'backend-api-integrador 2', healthy: !err,
     commit: process.env.COMMIT_SHA || 'local', message: 'Prueba 4 realizada por Damian'
-})));
+}));
+app.get('/api/health', health);
+app.get('/internal/health', health);
 app.use((req, res) => respond(res, 404, 'Ruta no encontrada'));
 app.use((err, req, res, next) => {
     if (String(err.message).includes('UNIQUE constraint failed')) return respond(res, 400, 'El email ya esta registrado');

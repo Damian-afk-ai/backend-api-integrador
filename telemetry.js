@@ -43,7 +43,7 @@ async function send(signal, records) {
 }
 
 function middleware(req, res, next) {
-    if (!process.env.OTLP_ENDPOINT || !process.env.OTLP_AUTH || req.path === '/api/health') return next();
+    if (!process.env.OTLP_ENDPOINT || !process.env.OTLP_AUTH) return next();
     const traceId = id(16);
     const spanId = id(8);
     const start = now();
